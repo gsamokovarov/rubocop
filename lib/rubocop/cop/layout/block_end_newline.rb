@@ -39,6 +39,8 @@ module RuboCop
           register_offense(node)
         end
 
+        alias on_numblock on_block
+
         private
 
         def register_offense(node)
@@ -62,6 +64,9 @@ module RuboCop
         def last_heredoc_argument(node)
           return unless node&.call_type?
           return unless (arguments = node&.arguments)
+
+          # return unless node.respond_to?(:arguments)
+          # return unless (arguments = node.arguments)
 
           heredoc = arguments.reverse.detect { |arg| arg.str_type? && arg.heredoc? }
           return heredoc if heredoc
