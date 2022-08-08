@@ -82,7 +82,7 @@ module RuboCop
 
         alias on_numblock on_block
 
-        def on_send(node) # rubocop:disable Metrics/CyclomaticComplexity
+        def on_send(node) # rubocop:disable Metrics/CyclomaticComplexity, Metrics/AbcSize
           return unless node.bare_access_modifier? &&
                         (!node.parent&.block_type? || !node.parent&.numblock_type?)
           return if expected_empty_lines?(node)
