@@ -101,7 +101,7 @@ module RuboCop
         return unless last_pair.key.source == last_pair.value.source
         return unless (dispatch_node = find_ancestor_method_dispatch_node(node))
         return if dispatch_node.parenthesized?
-        return unless last_expression?(dispatch_node) || method_dispatch_as_argument?(dispatch_node)
+        return if last_expression?(dispatch_node) && !method_dispatch_as_argument?(dispatch_node)
 
         def_node = node.each_ancestor(:send, :csend, :super, :yield).first
 
@@ -133,8 +133,16 @@ module RuboCop
       end
 
       def last_expression?(ancestor)
-        ancestor.right_sibling ||
-          ancestor.each_ancestor.find { |node| node.assignment? || node.send_type? }&.right_sibling
+        return false if ancestor.right_sibling
+
+        predecessor = ancestor.each_ancestor.find do |node|
+          node.assignment? || node.send_type?
+        end
+
+        return true unless predecessor
+        return last_expression?(predecessor.parent) if predecessor.parent&.assignment?
+
+        !predecessor.right_sibling
       end
 
       def method_dispatch_as_argument?(method_dispatch_node)
